@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StoryKart Meta Ads Lead Quality Tracker | Myos Makeover Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E53E3E', // StoryKart Red
+                        primaryHover: '#C53030', // Darker Red for hover
+                        secondary: '#1A202C', // StoryKart Black
+                        dark: '#1F2937', 
+                        light: '#ffffff', // Pure white background
+                        accent: '#FEE2E2', // Light red for highlights
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; color: #1A202C; }
+        
+        /* Custom scrollbar for tables */
+        .table-container::-webkit-scrollbar { height: 6px; width: 6px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Tab transitions */
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Status Badges */
+        .badge { padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
+        .badge-new { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+        .badge-contacted { background-color: #FEF3C7; color: #92400E; }
+        .badge-qualified { background-color: #E0E7FF; color: #3730A3; }
+        .badge-high-intent { background-color: #FEE2E2; color: #991B1B; font-weight: bold; }
+        .badge-won { background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+        .badge-lost { background-color: #F3F4F6; color: #4B5563; }
+        
+        /* Modal responsiveness */
+        .modal-body { max-height: calc(100vh - 140px); overflow-y: auto; }
+        @media (max-width: 640px) {
+            .modal-body { max-height: calc(100vh - 120px); }
+        }
+
+        /* Print / PDF Executive Summary Styles */
+        @media print {
+            body { height: auto !important; overflow: visible !important; background: #fff !important; }
+            header, nav, .no-print { display: none !important; }
+            main { overflow: visible !important; padding: 0 !important; }
+            .tab-content { display: block !important; margin-bottom: 2rem; page-break-inside: avoid; }
+            #content-leads { display: none !important; }
+            .print-header { display: flex !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden bg-gray-50">
+
+    <!-- Print-Only Executive Report Header -->
+    <div class="print-header hidden items-center justify-between border-b-2 border-primary pb-4 mb-6 px-6 pt-4">
+        <div>
+            <h1 class="text-2xl font-bold text-secondary">StoryKart Meta Ads — Executive Summary Report</h1>
+            <p class="text-sm text-gray-600">Client: <strong>Myos Makeover Studio</strong> | Generated on <span id="printDate"></span></p>
+        </div>
+        <div class="text-right">
+            <span class="text-xs font-bold bg-accent text-primary px-3 py-1 rounded-full" id="printPeriodBadge">All Months</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 z-20 flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap justify-between min-h-[4rem] py-2 items-center gap-2">
+                <!-- Brand Logo & Title -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <img src="Storykart Logo Primary.jpg" alt="StoryKart Logo" class="h-8 sm:h-10 object-contain" onerror="this.src='https://placehold.co/100x40/ffffff/E53E3E?text=SK';">
+                    <div class="border-l-2 border-gray-200 pl-2 sm:pl-3">
+                        <h1 class="text-sm sm:text-lg font-bold text-gray-900 leading-tight">Lead Quality Tracker</h1>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span id="syncDot" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span id="syncStatusText" class="text-[10px] text-gray-500 font-medium">Live Synced</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 sm:gap-2.5 flex-wrap justify-end">
+                    <!-- Client & Month Selector Pill -->
+                    <div class="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-1 shadow-sm">
+                        <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 border-r border-gray-200">
+                            <span class="text-xs font-medium text-gray-500">Client:</span>
+                            <span class="text-xs font-bold text-secondary">Myos Makeover Studio</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 px-2 py-0.5">
+                            <i class="far fa-calendar-alt text-primary text-xs"></i>
+                            <select id="monthFilter" onchange="onMonthChange()" class="bg-transparent text-xs sm:text-sm font-bold text-secondary focus:outline-none cursor-pointer pr-1">
+                                <option value="All">All Months</option>
+                                <option value="2026-01">Jan 2026</option>
+                                <option value="2026-02">Feb 2026</option>
+                                <option value="2026-03">Mar 2026</option>
+                                <option value="2026-04">Apr 2026</option>
+                                <option value="2026-05">May 2026</option>
+                                <option value="2026-06">Jun 2026</option>
+                                <option value="2026-07">Jul 2026</option>
+                                <option value="2026-08">Aug 2026</option>
+                                <option value="2026-09">Sep 2026</option>
+                                <option value="2026-10">Oct 2026</option>
+                                <option value="2026-11">Nov 2026</option>
+                                <option value="2026-12">Dec 2026</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Refresh Button -->
+                    <button onclick="loadData(false)" id="refreshBtn" class="bg-white hover:bg-gray-50 text-gray-700 p-2 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors border border-gray-300 shadow-sm flex items-center gap-1.5" title="Sync with Google Sheet">
+                        <i id="refreshIcon" class="fas fa-sync-alt text-gray-600"></i>
+                        <span class="hidden lg:inline">Sync</span>
+                    </button>
+
+                    <!-- Print / PDF Executive Summary Button -->
+                    <button onclick="printExecutiveReport()" class="bg-white hover:bg-gray-50 text-gray-700 p-2 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors border border-gray-300 shadow-sm flex items-center gap-1.5" title="Print 1-Page Executive Summary PDF">
+                        <i class="fas fa-file-pdf text-primary"></i>
+                        <span class="hidden xl:inline">PDF Summary</span>
+                    </button>
+
+                    <!-- CSV Export Button -->
+                    <button onclick="exportData()" class="bg-white hover:bg-gray-50 text-gray-700 p-2 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors border border-gray-300 shadow-sm flex items-center gap-1.5" title="Download Excel/CSV Report">
+                        <i class="fas fa-file-csv text-green-600"></i>
+                        <span class="hidden sm:inline">CSV</span>
+                    </button>
+
+                    <!-- Admin Mode Lock / Unlock & Admin Controls -->
+                    <button onclick="handleAdminButtonClick()" id="adminToggleBtn" class="bg-white hover:bg-gray-100 text-gray-600 p-2 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors border border-gray-300 shadow-sm flex items-center gap-1.5" title="Admin Login to Manage Campaigns & Data">
+                        <i id="adminLockIcon" class="fas fa-lock text-gray-500"></i>
+                        <span id="adminBtnText" class="hidden lg:inline">Admin</span>
+                    </button>
+
+                    <!-- Admin Clear Button (Visible only when Admin is unlocked) -->
+                    <button onclick="openClearModal()" id="adminClearBtn" class="hidden bg-white hover:bg-red-50 text-red-600 p-2 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors border border-red-200 shadow-sm items-center gap-1.5" title="Admin Clear Data">
+                        <i class="fas fa-trash-alt"></i>
+                        <span class="hidden lg:inline">Clear Data</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile-only Client Name Bar -->
+            <div class="flex md:hidden items-center justify-between py-1.5 border-t border-gray-100 text-xs">
+                <span class="text-gray-500 font-medium">Client: <strong class="text-secondary">Myos Makeover Studio</strong></span>
+                <span id="mobileMonthBadge" class="text-[11px] font-semibold text-primary bg-accent px-2 py-0.5 rounded-full">All Months</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b border-gray-200 flex-shrink-0 overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <nav class="flex space-x-6 sm:space-x-8 min-w-max" aria-label="Tabs">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn border-primary text-primary whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 transition-colors">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </button>
+                <button onclick="switchTab('leads')" id="tab-leads" class="tab-btn border-transparent text-gray-500 hover:text-secondary hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 transition-colors">
+                    <i class="fas fa-users"></i> Lead Tracker
+                    <span id="tab-leads-count" class="bg-gray-100 text-secondary text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="switchTab('campaigns')" id="tab-campaigns" class="tab-btn border-transparent text-gray-500 hover:text-secondary hover:border-gray-300 whitespace-nowrap py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 transition-colors">
+                    <i class="fas fa-bullhorn"></i> Active Campaigns & Info
+                    <span id="tab-campaigns-count" class="bg-accent text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                </button>
+            </nav>
+
+            <!-- Quick Client Page Info Bar (Desktop) -->
+            <div class="hidden lg:flex items-center gap-2 text-xs text-gray-500">
+                <span class="px-2 py-1 rounded bg-gray-50 border border-gray-200 flex items-center gap-1.5">
+                    <i class="fas fa-map-marker-alt text-primary"></i> Koyilandy, Calicut
+                </span>
+                <span class="px-2 py-1 rounded bg-gray-50 border border-gray-200 flex items-center gap-1.5">
+                    <i class="fab fa-meta text-blue-600"></i> Meta Lead & WA Ads
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto space-y-6">
+            
+            <!-- Dashboard Tab -->
+            <div id="content-dashboard" class="tab-content active space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Executive Dashboard</h2>
+                            <span id="dash-period-badge" class="text-xs font-bold bg-secondary text-white px-2.5 py-0.5 rounded-full">All Months</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Live summary of lead quality, follow-ups, and conversions.</p>
+                    </div>
+                    <div class="flex items-center gap-2 no-print">
+                        <button onclick="switchTab('campaigns')" class="bg-white hover:bg-gray-50 text-secondary border border-gray-300 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm flex items-center gap-1.5">
+                            <i class="fas fa-bullhorn text-primary"></i> View Active Campaigns
+                        </button>
+                        <button onclick="openAddLeadModal()" class="bg-primary hover:bg-primaryHover text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Quick Add Lead
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-12 h-12 sm:w-16 sm:h-16 bg-accent rounded-bl-full -mr-2 -mt-2 sm:-mr-4 sm:-mt-4 transition-transform group-hover:scale-110"></div>
+                        <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1 relative z-10">Total Inquiries</p>
+                        <h3 class="text-2xl sm:text-4xl font-bold text-secondary relative z-10" id="dash-total-leads">0</h3>
+                        <p class="text-[11px] text-gray-400 mt-1" id="dash-avg-score">⭐ 0.0 Avg Quality</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-bl-full -mr-2 -mt-2 sm:-mr-4 sm:-mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center relative z-10 gap-2">
+                            <div>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1">High-Intent (4-5★)</p>
+                                <h3 class="text-2xl sm:text-4xl font-bold text-secondary" id="dash-qualified-leads">0</h3>
+                            </div>
+                            <div class="text-left sm:text-right">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-secondary border border-gray-200 whitespace-nowrap" id="dash-qualified-rate">0% Rate</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Ready for priority closing</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-12 h-12 sm:w-16 sm:h-16 bg-accent rounded-bl-full -mr-2 -mt-2 sm:-mr-4 sm:-mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center relative z-10 gap-2">
+                            <div>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1">Won Bookings</p>
+                                <h3 class="text-2xl sm:text-4xl font-bold text-primary" id="dash-won-leads">0</h3>
+                            </div>
+                            <div class="text-left sm:text-right">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent text-primary border border-red-200 whitespace-nowrap" id="dash-win-rate">0% Win</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Confirmed studio clients</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-bl-full -mr-2 -mt-2 sm:-mr-4 sm:-mt-4 transition-transform group-hover:scale-110"></div>
+                        <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1 relative z-10">Conversion Value</p>
+                        <h3 class="text-xl sm:text-3xl font-bold text-secondary relative z-10 truncate" id="dash-total-value">₹0</h3>
+                        <p class="text-[11px] text-gray-400 mt-1">From converted inquiries</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:col-span-2 overflow-hidden">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Funnel Stage Breakdown</h3>
+                        <div class="space-y-3 sm:space-y-4" id="funnel-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4 border-b pb-2 flex items-center justify-between">
+                            <span>Attention Required</span>
+                            <i class="fas fa-bell text-primary text-sm"></i>
+                        </h3>
+                        <div class="space-y-3">
+                            <div onclick="filterByQuickAction('New Inquiry')" class="cursor-pointer hover:bg-red-100 transition-colors flex items-center justify-between p-3 bg-accent rounded-lg border border-red-200">
+                                <div>
+                                    <p class="text-xs sm:text-sm font-bold text-red-900">Uncontacted New Leads</p>
+                                    <p class="text-[11px] text-red-700">Click to view & call immediately</p>
+                                </div>
+                                <span class="text-lg sm:text-xl font-bold text-primary" id="insight-new">0</span>
+                            </div>
+
+                            <div onclick="filterByQuickAction('Due')" class="cursor-pointer hover:bg-amber-100 transition-colors flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                <div>
+                                    <p class="text-xs sm:text-sm font-bold text-amber-900">Follow-ups Due / Overdue</p>
+                                    <p class="text-[11px] text-amber-700">Scheduled for today or earlier</p>
+                                </div>
+                                <span class="text-lg sm:text-xl font-bold text-amber-700" id="insight-overdue">0</span>
+                            </div>
+
+                            <div onclick="filterByQuickAction('Active')" class="cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div>
+                                    <p class="text-xs sm:text-sm font-medium text-gray-800">Active Pipeline Follow-ups</p>
+                                    <p class="text-[11px] text-gray-500">Contacted, Qualified & High Intent</p>
+                                </div>
+                                <span class="text-base sm:text-lg font-bold text-secondary" id="insight-followup">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location & Inquiry Source Insights Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                        <div class="flex items-center justify-between border-b pb-2 mb-4">
+                            <h3 class="text-sm sm:text-base font-bold text-secondary flex items-center gap-2">
+                                <i class="fas fa-map-marker-alt text-primary"></i> Top Customer Locations
+                            </h3>
+                            <span class="text-[11px] text-gray-400">By Inquiries & Wins</span>
+                        </div>
+                        <div id="location-insights-container" class="space-y-2.5">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                        <div class="flex items-center justify-between border-b pb-2 mb-4">
+                            <h3 class="text-sm sm:text-base font-bold text-secondary flex items-center gap-2">
+                                <i class="fas fa-comments text-primary"></i> Inquiry Source Performance
+                            </h3>
+                            <span class="text-[11px] text-gray-400">WhatsApp vs IG vs Form</span>
+                        </div>
+                        <div id="source-insights-container" class="space-y-2.5">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lead Tracker Tab -->
+            <div id="content-leads" class="tab-content space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Lead Tracker Master</h2>
+                        <p class="text-xs text-gray-500">Tip: Click directly on <strong>Quality Stars (★)</strong> or <strong>Stage</strong> in the table to update instantly!</p>
+                    </div>
+                    <button onclick="openAddLeadModal()" class="w-full sm:w-auto bg-primary hover:bg-primaryHover text-white px-4 py-2.5 sm:py-2 rounded-md text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> Add New Lead
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                    <!-- Search & Filters Bar -->
+                    <div class="p-3 sm:p-4 border-b border-gray-200 flex flex-col md:flex-row gap-3 bg-gray-50 justify-between items-stretch md:items-center">
+                        <div class="relative w-full md:max-w-xs">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search name, phone, location, ad..." class="pl-9 block w-full text-xs sm:text-sm border-gray-300 rounded-md focus:ring-primary focus:border-primary border p-2">
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                            <select id="campaignFilterDropdown" onchange="filterTable()" class="flex-1 sm:flex-none border-gray-300 rounded-md text-xs sm:text-sm p-2 focus:ring-primary focus:border-primary border bg-white">
+                                <option value="All">All Campaigns</option>
+                            </select>
+                            <select id="sourceFilter" onchange="filterTable()" class="flex-1 sm:flex-none border-gray-300 rounded-md text-xs sm:text-sm p-2 focus:ring-primary focus:border-primary border bg-white">
+                                <option value="All">All Sources</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="Instagram DM">Instagram DM</option>
+                                <option value="Lead Form">Lead Form</option>
+                                <option value="Call">Call</option>
+                                <option value="Website">Website</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <select id="stageFilter" onchange="filterTable()" class="flex-1 sm:flex-none border-gray-300 rounded-md text-xs sm:text-sm p-2 focus:ring-primary focus:border-primary border bg-white">
+                                <option value="All">All Stages</option>
+                                <option value="New Inquiry">New Inquiry</option>
+                                <option value="Contacted">Contacted</option>
+                                <option value="Qualified">Qualified</option>
+                                <option value="High Intent">High Intent</option>
+                                <option value="Won">Won</option>
+                                <option value="Lost">Lost</option>
+                                <option value="DUE_FOLLOWUP">🔔 Due / Overdue Follow-up</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Responsive Table Wrapper -->
+                    <div class="overflow-x-auto table-container w-full">
+                        <table class="min-w-full divide-y divide-gray-200" id="leadsTable">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-left text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">Date</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-left text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap min-w-[190px]">Client & Smart Contact</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-left text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap min-w-[140px]">Campaign & Creative</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-left text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap bg-gray-50">Source</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-left text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap bg-gray-50 min-w-[130px]">Service / Need</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap min-w-[110px]">Quality (Click ★)</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap min-w-[130px]">Stage & Status</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-left text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap min-w-[150px]">Follow-up & Remarks</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-right text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap bg-accent/30">Total (₹)</th>
+                                    <th scope="col" class="px-3 sm:px-4 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap sticky right-0 bg-gray-100">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="leadsTableBody">
+                                <!-- Data will be populated here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign Summary & Active Campaign Info Tab -->
+            <div id="content-campaigns" class="tab-content space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Active Campaigns & Info</h2>
+                            <span id="adminCampaignModeBadge" class="hidden text-[10px] font-bold bg-secondary text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider">Admin Edit Mode</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-500" id="campaignsTabSubtitle">Live performance overview of currently active Meta Ad Campaigns, target audience, and ad creatives.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 no-print">
+                        <!-- Admin-Only Add/Customize Campaign Button -->
+                        <button id="adminAddCampaignBtn" onclick="openCampaignMetaModal('')" class="hidden bg-secondary hover:bg-gray-800 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm items-center gap-2">
+                            <i class="fas fa-bullhorn text-primary"></i> + Add / Customize Campaign
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Active Campaign Cards Grid -->
+                <div id="activeCampaignCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Populated dynamically by JS -->
+                </div>
+
+                <!-- Detailed Tabular Breakdown -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-4 sm:px-6 py-3.5 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-secondary uppercase tracking-wider">Campaign Comparison Matrix</h3>
+                        <span class="text-[11px] text-gray-500">Sorted by Total Inquiries</span>
+                    </div>
+                    <div class="overflow-x-auto table-container w-full">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">Campaign & Creatives Breakdown</th>
+                                    <th scope="col" class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">Total Leads</th>
+                                    <th scope="col" class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">Avg Quality</th>
+                                    <th scope="col" class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">High-Intent (4-5★)</th>
+                                    <th scope="col" class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">In Pipeline</th>
+                                    <th scope="col" class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">Won</th>
+                                    <th scope="col" class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">Win Rate</th>
+                                    <th scope="col" class="px-4 sm:px-6 py-3 text-right text-xs font-bold text-secondary uppercase tracking-wider whitespace-nowrap">Revenue (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="campaignTableBody">
+                                <!-- Data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Add/Edit Lead Modal -->
+    <div id="leadModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-end sm:items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white w-full sm:max-w-3xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden max-h-[95vh] sm:max-h-[90vh] rounded-t-2xl sm:m-4 animate-slide-up sm:animate-none">
+            
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-white sticky top-0 z-10">
+                <h3 class="text-lg sm:text-xl font-bold text-secondary" id="modalTitle">Add New Lead</h3>
+                <button onclick="closeAddLeadModal()" class="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 sm:p-6 overflow-y-auto flex-1 modal-body bg-gray-50">
+                <form id="leadForm" class="space-y-6">
+                    <input type="hidden" id="editLeadId">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 sm:p-5 rounded-lg border border-gray-200 shadow-sm">
+                        <!-- Basic Info Section -->
+                        <div class="space-y-4">
+                            <h4 class="text-sm font-bold text-secondary border-b border-gray-100 pb-2 uppercase tracking-wide">Client Details</h4>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Inquiry Date</label>
+                                <input type="date" id="formDate" required class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none transition-shadow">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Lead Name <span class="text-primary">*</span></label>
+                                <input type="text" id="formName" required class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none transition-shadow" placeholder="Customer full name">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Phone / WhatsApp</label>
+                                <input type="tel" id="formPhone" required class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none transition-shadow" placeholder="e.g. 9876543210">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Location</label>
+                                <input type="text" id="formLocation" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none transition-shadow" placeholder="e.g. Koyilandy, Calicut">
+                            </div>
+                        </div>
+
+                        <!-- Source & Campaign Section -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between border-b border-red-100 pb-2">
+                                <h4 class="text-sm font-bold text-primary uppercase tracking-wide">Campaign & Service Info</h4>
+                                <button type="button" id="modalAdminNewCampBtn" onclick="openCampaignMetaModal('')" class="hidden text-[11px] font-bold text-primary hover:underline items-center gap-1">
+                                    <i class="fas fa-plus-circle"></i> New Campaign
+                                </button>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Select Campaign Name</label>
+                                <input type="text" id="formCampaign" list="campaignDatalist" oninput="onFormCampaignInput()" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none transition-shadow" placeholder="Select active campaign...">
+                                <datalist id="campaignDatalist"></datalist>
+                                <div id="quickCampaignPills" class="flex flex-wrap gap-1 mt-1.5"></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Ad / Creative (Reel or Poster)</label>
+                                <input type="text" id="formAdCreative" list="creativeDatalist" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none transition-shadow" placeholder="Select or type Reel / Poster name">
+                                <datalist id="creativeDatalist"></datalist>
+                                <div id="quickCreativePills" class="flex flex-wrap gap-1 mt-1.5"></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Inquiry Source <span class="text-primary">*</span></label>
+                                <select id="formCategory" required class="block w-full bg-white border border-primary rounded-md py-2 px-3 text-sm font-medium text-secondary focus:ring-primary focus:border-primary outline-none shadow-sm transition-shadow">
+                                    <option value="" disabled selected>Select source...</option>
+                                    <option value="WhatsApp">WhatsApp</option>
+                                    <option value="Instagram DM">Instagram DM</option>
+                                    <option value="Lead Form">Lead Form</option>
+                                    <option value="Call">Call</option>
+                                    <option value="Website">Website</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Service / Need (Details)</label>
+                                <input type="text" id="formBookedService" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none transition-shadow" placeholder="e.g. Bridal Makeup, Hydra Facial, Hair Smoothening">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Qualification Section -->
+                    <div class="bg-white p-4 sm:p-5 rounded-lg border border-gray-200 shadow-sm space-y-4">
+                        <h4 class="text-sm font-bold text-secondary border-b border-gray-100 pb-2 uppercase tracking-wide">Qualification & Value</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Quality Score (1-5)</label>
+                                <select id="formScore" class="block w-full bg-white border border-gray-300 rounded-md py-2 px-2 text-sm focus:ring-primary focus:border-primary outline-none">
+                                    <option value="0">Not Scored</option>
+                                    <option value="1">1 ★ - Low / Irrelevant</option>
+                                    <option value="2">2 ★ - Price Shopper</option>
+                                    <option value="3">3 ★ - Moderate Interest</option>
+                                    <option value="4">4 ★ - Good Qualified Lead</option>
+                                    <option value="5">5 ★ - High-Intent Ready</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Sales Status</label>
+                                <select id="formSalesStatus" class="block w-full bg-white border border-gray-300 rounded-md py-2 px-2 text-sm focus:ring-primary focus:border-primary outline-none">
+                                    <option value="Open">Open</option>
+                                    <option value="Appointment Booked">Appointment Booked</option>
+                                    <option value="Quote Sent">Quote Sent</option>
+                                    <option value="Won">Won</option>
+                                    <option value="Lost">Lost</option>
+                                    <option value="Not Proceeding">Not Proceeding</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Funnel Stage</label>
+                                <select id="formStage" class="block w-full bg-white border border-gray-300 rounded-md py-2 px-2 text-sm font-medium focus:ring-primary focus:border-primary outline-none">
+                                    <option value="New Inquiry">New Inquiry</option>
+                                    <option value="Contacted">Contacted</option>
+                                    <option value="Qualified">Qualified</option>
+                                    <option value="High Intent">High Intent</option>
+                                    <option value="Won">Won</option>
+                                    <option value="Lost">Lost</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Total Price (₹)</label>
+                                <input type="number" id="formPrice" min="0" class="block w-full border border-primary rounded-md py-2 px-2 text-sm font-bold text-primary bg-accent/20 focus:ring-primary focus:border-primary outline-none" placeholder="0">
+                            </div>
+                            <div class="col-span-1 sm:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Customer Value Tier</label>
+                                <select id="formValueClass" class="block w-full bg-white border border-gray-300 rounded-md py-2 px-2 text-sm focus:ring-primary focus:border-primary outline-none">
+                                    <option value="Standard">Standard</option>
+                                    <option value="Premium">Premium</option>
+                                    <option value="VIP">VIP</option>
+                                </select>
+                            </div>
+                            <div class="col-span-1 sm:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Lost / Low Quality Reason (If applicable)</label>
+                                <select id="formLostReason" class="block w-full bg-white border border-gray-300 rounded-md py-2 px-2 text-sm focus:ring-primary focus:border-primary outline-none">
+                                    <option value="">None / Active Lead</option>
+                                    <option value="Price / Budget Issue">Price / Budget Issue</option>
+                                    <option value="Out of Location">Out of Location</option>
+                                    <option value="No Response / Unreachable">No Response / Unreachable</option>
+                                    <option value="Just Inquiring / Window Shopping">Just Inquiring / Window Shopping</option>
+                                    <option value="Booked Another Studio">Booked Another Studio</option>
+                                    <option value="Service Not Available">Service Not Available</option>
+                                    <option value="Wrong / Invalid Number">Wrong / Invalid Number</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Follow Up Section -->
+                    <div class="bg-white p-4 sm:p-5 rounded-lg border border-gray-200 shadow-sm space-y-4">
+                        <h4 class="text-sm font-bold text-secondary border-b border-gray-100 pb-2 uppercase tracking-wide">Follow Up Details</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                            <div class="col-span-1">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Last Contact</label>
+                                <input type="date" id="formLastContact" class="block w-full border border-gray-300 rounded-md py-2 px-2 text-xs sm:text-sm focus:ring-primary outline-none">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Next Follow-up</label>
+                                <input type="date" id="formNextFollowup" class="block w-full border border-gray-300 rounded-md py-2 px-2 text-xs sm:text-sm focus:ring-primary outline-none">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Next Action / Remarks</label>
+                                <input type="text" id="formNextAction" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary outline-none" placeholder="e.g. Call back evening, sent bridal package PDF">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="px-4 sm:px-6 py-4 border-t border-gray-200 bg-white flex justify-end gap-3 sticky bottom-0 z-10 pb-6 sm:pb-4">
+                <button onclick="closeAddLeadModal()" class="w-full sm:w-auto bg-white border border-gray-300 rounded-md py-2.5 px-4 text-sm font-bold text-gray-700 hover:bg-gray-50 focus:outline-none">
+                    Cancel
+                </button>
+                <button onclick="saveLead()" id="saveBtn" class="w-full sm:w-auto bg-primary border border-transparent rounded-md py-2.5 px-6 text-sm font-bold text-white hover:bg-primaryHover focus:outline-none shadow-md">
+                    Save Lead Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link / Customize Active Meta Campaign Modal (Multi-Creative Cloud-Synced) -->
+    <div id="campaignMetaModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-3 sm:p-4">
+        <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl flex flex-col border border-gray-200 max-h-[92vh] overflow-hidden">
+            <div class="flex items-center justify-between border-b px-5 py-4 bg-white">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-secondary flex items-center gap-2" id="campModalHeading">
+                        <i class="fas fa-bullhorn text-primary"></i> Link / Customize Meta Campaign & Creatives
+                    </h3>
+                    <p class="text-[11px] text-gray-500">Add multiple Reels / Posters under this campaign with individual links & thumbnails.</p>
+                </div>
+                <button onclick="closeCampaignMetaModal()" class="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-4 flex-1 bg-gray-50">
+                <div class="bg-white p-4 rounded-lg border border-gray-200 space-y-3 shadow-sm">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Campaign / Ad Set Name (Exact Name in Meta Ads) <span class="text-primary">*</span></label>
+                        <input type="text" id="metaCampaignName" placeholder="e.g. Bridal Makeover Campaign - Oct" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm font-semibold text-secondary focus:ring-primary focus:border-primary outline-none">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Campaign Status</label>
+                            <select id="metaStatus" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm bg-white">
+                                <option value="Active">● Active Running</option>
+                                <option value="Paused">⏸ Paused / Completed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Ad Platform / Objective</label>
+                            <input type="text" id="metaObjective" placeholder="e.g. WhatsApp & IG DM Ads" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Target Location & Audience</label>
+                        <input type="text" id="metaAudience" placeholder="e.g. Koyilandy + 15km | Women 18-45" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm">
+                    </div>
+                </div>
+
+                <!-- Dynamic Multi-Creative Builder -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200 space-y-3 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-secondary flex items-center gap-1.5">
+                                <i class="fas fa-photo-video text-primary"></i> Ad Creatives / Reels in this Ad Set
+                            </h4>
+                            <p class="text-[11px] text-gray-500">Each creative gets its own thumbnail, live post preview link, and automatic lead counter.</p>
+                        </div>
+                        <button type="button" onclick="addCreativeRow()" class="bg-accent hover:bg-red-200 text-primary px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 flex-shrink-0">
+                            <i class="fas fa-plus"></i> Add Creative
+                        </button>
+                    </div>
+
+                    <div id="creativeBuilderList" class="space-y-3">
+                        <!-- Dynamic rows injected by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 px-5 py-3.5 border-t bg-white">
+                <button onclick="closeCampaignMetaModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-xs font-bold">Cancel</button>
+                <button onclick="saveCampaignMeta()" id="saveCampMetaBtn" class="bg-primary hover:bg-primaryHover text-white px-5 py-2 rounded-md text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                    <i class="fas fa-cloud-upload-alt"></i> Save & Sync Campaign
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart WhatsApp Quick Message Modal -->
+    <div id="waTemplateModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl p-5 space-y-4 border border-gray-200">
+            <div class="flex items-center justify-between border-b pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                        <i class="fab fa-whatsapp text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-secondary" id="waModalClientName">Send WhatsApp Message</h3>
+                        <p class="text-[11px] text-gray-500" id="waModalClientPhone"></p>
+                    </div>
+                </div>
+                <button onclick="closeWaModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-2" id="waTemplatesList">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl p-6 space-y-4 border border-gray-200">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="text-base font-bold text-secondary flex items-center gap-2">
+                    <i class="fas fa-user-shield text-primary"></i> StoryKart Admin Login
+                </h3>
+                <button onclick="closeAdminLoginModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-600">Enter the Admin Password to add or customize Active Campaigns, Ad Links, Thumbnails, or clear test data.</p>
+            <div>
+                <input type="password" id="adminModePasswordInput" onkeydown="if(event.key==='Enter') confirmAdminLogin()" placeholder="Enter Admin Password" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAdminLoginModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-xs font-bold">Cancel</button>
+                <button onclick="confirmAdminLogin()" class="bg-secondary hover:bg-gray-800 text-white px-4 py-2 rounded-md text-xs font-bold flex items-center gap-1.5">
+                    <i class="fas fa-unlock-alt text-primary"></i> Unlock Admin
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Clear Data Modal -->
+    <div id="clearModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl p-6 space-y-4 border border-gray-200">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="text-base font-bold text-secondary flex items-center gap-2">
+                    <i class="fas fa-shield-alt text-primary"></i> Admin Access Required
+                </h3>
+                <button onclick="closeClearModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-600">Enter the admin password to permanently clear all test leads from the tracker and Google Sheet.</p>
+            <div>
+                <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" class="block w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:ring-primary focus:border-primary outline-none">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeClearModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-xs font-bold">Cancel</button>
+                <button onclick="confirmAdminClear()" id="confirmClearBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-xs font-bold flex items-center gap-1">
+                    <i class="fas fa-trash-alt"></i> Delete All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Mobile slide up animation for modal */
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @media (min-width: 640px) { .animate-slide-up { animation: none; } }
+    </style>
+
+    <script>
+        // --- GOOGLE APPS SCRIPT URL ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUnZF061IskzsiVGQWIw8bGuA0lZWWdTw4nx-LqSzFMYF1HW2EH975kZMGSKiH_6ju_Q/exec';
+        
+        let leads = [];
+        let cloudCampaignsMeta = {};
+        let isLoading = false;
+        let isAdminMode = sessionStorage.getItem('sk_myos_admin_unlocked') === 'true';
+
+        function applyAdminModeUI() {
+            const adminToggleBtn = document.getElementById('adminToggleBtn');
+            const adminLockIcon = document.getElementById('adminLockIcon');
+            const adminBtnText = document.getElementById('adminBtnText');
+            const adminClearBtn = document.getElementById('adminClearBtn');
+            const adminAddCampaignBtn = document.getElementById('adminAddCampaignBtn');
+            const adminCampaignModeBadge = document.getElementById('adminCampaignModeBadge');
+            const modalAdminNewCampBtn = document.getElementById('modalAdminNewCampBtn');
+
+            if (isAdminMode) {
+                if (adminToggleBtn) {
+                    adminToggleBtn.className = 'bg-secondary hover:bg-gray-800 text-white p-2 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-semibold transition-colors border border-secondary shadow-sm flex items-center gap-1.5';
+                    adminToggleBtn.title = 'Click to Exit Admin Mode (Switch to Client View)';
+                }
+                if (adminLockIcon) adminLockIcon.className = 'fas fa-unlock-alt text-primary';
+                if (adminBtnText) adminBtnText.innerText = 'Exit Admin';
+                if (adminClearBtn) {
+                    adminClearBtn.classList.remove('hidden');
+                    adminClearBtn.classList.add('flex');
+                }
+                if (adminAddCampaignBtn) {
+                    adminAddCampaignBtn.classList.remove('hidden');
+                    adminAddCampaignBtn.classList.add('flex');
+                }
+                if (adminCampaignModeBadge) adminCampaignModeBadge.classList.remove('hidden');
+                if (modalAdminNewCampBtn) {
+                    modalAdminNewCampBtn.classList.remove('hidden');
+                    modalAdminNewCampBtn.classList.add('flex');
+                }
+            } else {
+                if (adminToggleBtn) {
+                    adminToggleBtn.className = 'bg-white hover:bg-gray-100 text-gray-600 p-2 sm:px-3 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors border border-gray-300 shadow-sm flex items-center gap-1.5';
+                    adminToggleBtn.title = 'Admin Login to Manage Campaigns & Data';
+                }
+                if (adminLockIcon) adminLockIcon.className = 'fas fa-lock text-gray-400';
+                if (adminBtnText) adminBtnText.innerText = 'Admin';
+                if (adminClearBtn) {
+                    adminClearBtn.classList.add('hidden');
+                    adminClearBtn.classList.remove('flex');
+                }
+                if (adminAddCampaignBtn) {
+                    adminAddCampaignBtn.classList.add('hidden');
+                    adminAddCampaignBtn.classList.remove('flex');
+                }
+                if (adminCampaignModeBadge) adminCampaignModeBadge.classList.add('hidden');
+                if (modalAdminNewCampBtn) {
+                    modalAdminNewCampBtn.classList.add('hidden');
+                    modalAdminNewCampBtn.classList.remove('flex');
+                }
+            }
+            calculateMetrics();
+        }
+
+        function handleAdminButtonClick() {
+            if (isAdminMode) {
+                isAdminMode = false;
+                sessionStorage.removeItem('sk_myos_admin_unlocked');
+                applyAdminModeUI();
+                showToast("Switched to Client View (Admin Locked)");
+            } else {
+                document.getElementById('adminModePasswordInput').value = '';
+                document.getElementById('adminLoginModal').classList.remove('hidden');
+                setTimeout(() => document.getElementById('adminModePasswordInput').focus(), 100);
+            }
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+        }
+
+        function confirmAdminLogin() {
+            const pwd = document.getElementById('adminModePasswordInput').value;
+            if (pwd === 'StorykartAdmin') {
+                isAdminMode = true;
+                sessionStorage.setItem('sk_myos_admin_unlocked', 'true');
+                closeAdminLoginModal();
+                applyAdminModeUI();
+                showToast("Admin Mode Unlocked! You can now manage Active Campaigns.");
+            } else {
+                showToast("Incorrect Admin Password!", true);
+            }
+        }
+
+        // Cloud + LocalStorage synced campaign metadata
+        function getCampaignMetaStore() {
+            let local = {};
+            try {
+                local = JSON.parse(localStorage.getItem('sk_myos_campaign_meta') || '{}');
+            } catch (e) {}
+            return Object.assign({}, local, cloudCampaignsMeta);
+        }
+
+        function setCampaignMetaStore(store) {
+            cloudCampaignsMeta = store;
+            try {
+                localStorage.setItem('sk_myos_campaign_meta', JSON.stringify(store));
+            } catch (e) {}
+        }
+
+        /**
+         * Parse structured creative objects for a campaign.
+         * Supports both `creativeItems` array AND pipe-separated `adLink` / `thumbUrl` paired with comma-separated `creatives`
+         * so multi-creative links & thumbnails persist seamlessly across Google Sheet columns.
+         */
+        function extractCreativeObjects(customMeta = {}, dynamicCreativeMap = {}) {
+            const itemsMap = new Map();
+
+            // 1. Check structured creativeItems array if present
+            if (Array.isArray(customMeta.creativeItems) && customMeta.creativeItems.length > 0) {
+                customMeta.creativeItems.forEach(item => {
+                    const cName = String(item.name || '').trim();
+                    if (cName) {
+                        itemsMap.set(cName.toLowerCase(), {
+                            name: cName,
+                            adLink: String(item.adLink || '').trim(),
+                            thumbUrl: String(item.thumbUrl || '').trim()
+                        });
+                    }
+                });
+            }
+
+            // 2. Also parse from comma-separated `creatives` + pipe-separated `adLink` and `thumbUrl`
+            if (itemsMap.size === 0 && customMeta.creatives) {
+                const names = String(customMeta.creatives).split(',').map(s => s.trim()).filter(Boolean);
+                const links = String(customMeta.adLink || '').split('|').map(s => s.trim());
+                const thumbs = String(customMeta.thumbUrl || '').split('|').map(s => s.trim());
+
+                names.forEach((cName, idx) => {
+                    const key = cName.toLowerCase();
+                    if (!itemsMap.has(key)) {
+                        itemsMap.set(key, {
+                            name: cName,
+                            adLink: links[idx] || (idx === 0 ? links[0] : '') || '',
+                            thumbUrl: thumbs[idx] || (idx === 0 ? thumbs[0] : '') || ''
+                        });
+                    }
+                });
+            }
+
+            // 3. Merge any creatives discovered dynamically from logged leads in this campaign
+            Object.keys(dynamicCreativeMap).forEach(rawName => {
+                const cName = String(rawName || '').trim();
+                if (!cName) return;
+                const key = cName.toLowerCase();
+                if (!itemsMap.has(key)) {
+                    itemsMap.set(key, {
+                        name: cName,
+                        adLink: '',
+                        thumbUrl: ''
+                    });
+                }
+            });
+
+            // 4. Attach lead stats to each creative object
+            const result = Array.from(itemsMap.values()).map(item => {
+                const stats = dynamicCreativeMap[item.name] ||
+                    Object.entries(dynamicCreativeMap).find(([k]) => k.toLowerCase() === item.name.toLowerCase())?.[1] ||
+                    { count: 0, highIntent: 0, won: 0, value: 0 };
+                return {
+                    ...item,
+                    count: stats.count || 0,
+                    highIntent: stats.highIntent || 0,
+                    won: stats.won || 0,
+                    value: stats.value || 0
+                };
+            });
+
+            // Sort by lead count descending
+            return result.sort((a, b) => b.count - a.count);
+        }
+
+        // Helper: Normalize date string to YYYY-MM-DD
+        function normalizeDateStr(rawDate) {
+            if (!rawDate) return '';
+            const str = String(rawDate).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+            const dmy = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+            if (dmy) {
+                return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
+            }
+            const parsed = new Date(str);
+            if (!isNaN(parsed)) {
+                return parsed.toISOString().split('T')[0];
+            }
+            return str;
+        }
+
+        // Helper: Format YYYY-MM into readable "Oct 2026"
+        function formatMonthLabel(ym) {
+            if (!ym || ym === 'All') return 'All Months';
+            const [year, month] = ym.split('-');
+            const date = new Date(Number(year), Number(month) - 1, 1);
+            if (isNaN(date)) return ym;
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        // Ensure all Months, Active Campaigns, and Creatives are populated in dropdowns & datalists
+        function updateDropdownOptions() {
+            const select = document.getElementById('monthFilter');
+            const currentVal = select.value;
+            const existingMonths = new Set(Array.from(select.options).map(o => o.value));
+
+            const campSelect = document.getElementById('campaignFilterDropdown');
+            const currentCamp = campSelect ? campSelect.value : 'All';
+            const campaignsSet = new Set();
+            const creativesSet = new Set();
+
+            // 1. Add campaigns & creatives registered in Active Campaign Manager
+            const metaStore = getCampaignMetaStore();
+            Object.entries(metaStore).forEach(([cName, cMeta]) => {
+                if (cName) campaignsSet.add(cName);
+                const parsedCreatives = extractCreativeObjects(cMeta, {});
+                parsedCreatives.forEach(cr => {
+                    if (cr.name) creativesSet.add(cr.name);
+                });
+            });
+
+            // 2. Add campaigns & creatives from existing leads
+            leads.forEach(l => {
+                const norm = normalizeDateStr(l.date);
+                if (norm && norm.length >= 7) {
+                    const ym = norm.substring(0, 7);
+                    if (/^\d{4}-\d{2}$/.test(ym) && !existingMonths.has(ym)) {
+                        existingMonths.add(ym);
+                        const opt = document.createElement('option');
+                        opt.value = ym;
+                        opt.textContent = formatMonthLabel(ym);
+                        select.appendChild(opt);
+                    }
+                }
+                if (l.campaign) campaignsSet.add(l.campaign);
+                if (l.adCreative) creativesSet.add(l.adCreative);
+            });
+            select.value = currentVal;
+
+            const sortedCampaigns = Array.from(campaignsSet).sort();
+
+            if (campSelect) {
+                campSelect.innerHTML = '<option value="All">All Campaigns</option>';
+                sortedCampaigns.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    campSelect.appendChild(opt);
+                });
+                if (campaignsSet.has(currentCamp)) campSelect.value = currentCamp;
+            }
+
+            // Populate Campaign & Creative Datalists + Quick Select Pills inside Add Lead Modal
+            const campDatalist = document.getElementById('campaignDatalist');
+            if (campDatalist) {
+                campDatalist.innerHTML = sortedCampaigns.map(c => `<option value="${c}"></option>`).join('');
+            }
+
+            const pillsContainer = document.getElementById('quickCampaignPills');
+            if (pillsContainer) {
+                pillsContainer.innerHTML = sortedCampaigns.slice(0, 6).map(c => {
+                    const safeC = c.replace(/'/g, "\\'");
+                    const isActive = !metaStore[c] || metaStore[c].status !== 'Paused';
+                    return `<button type="button" onclick="selectQuickCampaign('${safeC}')" class="text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${isActive ? 'bg-accent/60 text-primary border-red-200 hover:bg-red-200' : 'bg-gray-100 text-gray-600 border-gray-200'}">${isActive ? '● ' : ''}${c}</button>`;
+                }).join('');
+            }
+
+            const creativeDatalist = document.getElementById('creativeDatalist');
+            if (creativeDatalist) {
+                creativeDatalist.innerHTML = Array.from(creativesSet).sort().map(cr => `<option value="${cr}"></option>`).join('');
+            }
+        }
+
+        function selectQuickCampaign(cName) {
+            const input = document.getElementById('formCampaign');
+            if (input) {
+                input.value = cName;
+                onFormCampaignInput();
+            }
+        }
+
+        function selectQuickCreative(crName) {
+            const input = document.getElementById('formAdCreative');
+            if (input) {
+                input.value = crName;
+            }
+        }
+
+        function onFormCampaignInput() {
+            const cName = document.getElementById('formCampaign').value.trim();
+            const metaStore = getCampaignMetaStore();
+            const cMeta = metaStore[cName] || {};
+            const creativeDatalist = document.getElementById('creativeDatalist');
+            const creativePills = document.getElementById('quickCreativePills');
+            if (!creativeDatalist) return;
+
+            const specificCreatives = new Set();
+            extractCreativeObjects(cMeta, {}).forEach(cr => {
+                if (cr.name) specificCreatives.add(cr.name);
+            });
+            leads.filter(l => l.campaign === cName && l.adCreative).forEach(l => specificCreatives.add(l.adCreative));
+
+            const crList = Array.from(specificCreatives);
+            if (crList.length > 0) {
+                creativeDatalist.innerHTML = crList.map(cr => `<option value="${cr}"></option>`).join('');
+                if (creativePills) {
+                    creativePills.innerHTML = crList.map(cr => {
+                        const safeCr = cr.replace(/'/g, "\\'");
+                        return `<button type="button" onclick="selectQuickCreative('${safeCr}')" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 hover:bg-accent text-secondary hover:text-primary border border-gray-200 transition-colors"><i class="fas fa-film text-primary mr-1"></i>${cr}</button>`;
+                    }).join('');
+                }
+            } else if (creativePills) {
+                creativePills.innerHTML = '';
+            }
+        }
+
+        // Get leads filtered by the selected Month in header
+        function getMonthFilteredLeads() {
+            const selectedMonth = document.getElementById('monthFilter').value;
+            if (selectedMonth === 'All') return leads;
+            return leads.filter(l => {
+                const norm = normalizeDateStr(l.date);
+                return norm.startsWith(selectedMonth);
+            });
+        }
+
+        function onMonthChange() {
+            const selectedMonth = document.getElementById('monthFilter').value;
+            const label = formatMonthLabel(selectedMonth);
+            document.getElementById('dash-period-badge').innerText = label;
+            const mobileBadge = document.getElementById('mobileMonthBadge');
+            if (mobileBadge) mobileBadge.innerText = label;
+
+            calculateMetrics();
+            filterTable();
+        }
+
+        // Fetch data from Google Sheet
+        async function loadData(silent = false) {
+            if (isLoading) return;
+            isLoading = true;
+
+            const refreshIcon = document.getElementById('refreshIcon');
+            const syncDot = document.getElementById('syncDot');
+            const syncText = document.getElementById('syncStatusText');
+
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+            if (syncText) syncText.innerText = 'Syncing...';
+
+            if (!silent && leads.length === 0) {
+                const tbody = document.getElementById('leadsTableBody');
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="10" class="px-6 py-10 text-center text-sm text-gray-500"><i class="fas fa-circle-notch fa-spin text-primary mr-2"></i> Syncing live leads from Google Sheet...</td></tr>`;
+                }
+            }
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                const result = await response.json();
+                if (result.status === 'success') {
+                    leads = result.data || [];
+                    if (result.campaignsMeta && typeof result.campaignsMeta === 'object') {
+                        const localStore = getCampaignMetaStore();
+                        const merged = Object.assign({}, localStore);
+                        Object.entries(result.campaignsMeta).forEach(([k, v]) => {
+                            // Preserve local creativeItems if cloud only returned flat strings
+                            const existingLocal = localStore[k] || {};
+                            merged[k] = Object.assign({}, existingLocal, v);
+                        });
+                        setCampaignMetaStore(merged);
+                    }
+                    leads.sort((a, b) => new Date(normalizeDateStr(b.date)) - new Date(normalizeDateStr(a.date)));
+                    updateDropdownOptions();
+                    calculateMetrics();
+                    filterTable();
+
+                    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    if (syncDot) syncDot.className = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
+                    if (syncText) syncText.innerText = `Synced ${now}`;
+                } else {
+                    if (!silent) showToast("Error loading data.", true);
+                    if (syncDot) syncDot.className = 'w-2 h-2 rounded-full bg-red-500';
+                    if (syncText) syncText.innerText = 'Sync Error';
+                }
+            } catch (error) {
+                console.error("Fetch error", error);
+                if (!silent) showToast("Failed to connect to server.", true);
+                if (syncDot) syncDot.className = 'w-2 h-2 rounded-full bg-red-500';
+                if (syncText) syncText.innerText = 'Offline';
+            } finally {
+                isLoading = false;
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-primary', 'text-primary');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.remove('border-transparent', 'text-gray-500');
+            activeBtn.classList.add('border-primary', 'text-primary');
+
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`content-${tabId}`).classList.add('active');
+
+            if (tabId === 'dashboard' || tabId === 'campaigns') calculateMetrics();
+        }
+
+        // Check if a lead's follow-up date is today or overdue
+        function getFollowupAlertState(lead) {
+            if (!lead.nextFollowup || lead.stage === 'Won' || lead.stage === 'Lost') return null;
+            const normFollow = normalizeDateStr(lead.nextFollowup);
+            if (!normFollow) return null;
+            const today = new Date().toISOString().split('T')[0];
+            if (normFollow < today) return 'overdue';
+            if (normFollow === today) return 'today';
+            return 'upcoming';
+        }
+
+        function calculateMetrics() {
+            const activeLeads = getMonthFilteredLeads();
+            const total = activeLeads.length;
+            const newLeads = activeLeads.filter(l => l.stage === 'New Inquiry').length;
+            const followUps = activeLeads.filter(l => ['Contacted', 'Qualified', 'High Intent'].includes(l.stage)).length;
+            const dueOrOverdue = activeLeads.filter(l => {
+                const st = getFollowupAlertState(l);
+                return st === 'overdue' || st === 'today';
+            }).length;
+            
+            const scoredLeads = activeLeads.filter(l => Number(l.score) > 0);
+            const avgScore = scoredLeads.length > 0
+                ? (scoredLeads.reduce((s, l) => s + Number(l.score), 0) / scoredLeads.length).toFixed(1)
+                : '0.0';
+
+            const qualifiedHighIntent = activeLeads.filter(l => Number(l.score) >= 4).length;
+            const won = activeLeads.filter(l => l.stage === 'Won').length;
+            
+            const qualRate = total > 0 ? ((qualifiedHighIntent / total) * 100).toFixed(1) : 0;
+            const winRate = total > 0 ? ((won / total) * 100).toFixed(1) : 0;
+            
+            const totalValue = activeLeads.reduce((sum, l) => l.stage === 'Won' ? sum + Number(l.price || 0) : sum, 0);
+
+            document.getElementById('dash-total-leads').innerText = total;
+            document.getElementById('tab-leads-count').innerText = total;
+            const avgScoreEl = document.getElementById('dash-avg-score');
+            if (avgScoreEl) avgScoreEl.innerText = `⭐ ${avgScore} / 5.0 Avg Quality`;
+
+            document.getElementById('dash-qualified-leads').innerText = qualifiedHighIntent;
+            document.getElementById('dash-qualified-rate').innerText = qualRate + '% Rate';
+            document.getElementById('dash-won-leads').innerText = won;
+            document.getElementById('dash-win-rate').innerText = winRate + '% Win';
+            
+            let displayValue = '₹' + totalValue.toLocaleString('en-IN');
+            if(window.innerWidth < 640 && totalValue > 100000) displayValue = '₹' + (totalValue/100000).toFixed(1) + 'L';
+            document.getElementById('dash-total-value').innerText = displayValue;
+
+            document.getElementById('insight-new').innerText = newLeads;
+            document.getElementById('insight-followup').innerText = followUps;
+            const overdueEl = document.getElementById('insight-overdue');
+            if (overdueEl) overdueEl.innerText = dueOrOverdue;
+
+            renderFunnel(activeLeads);
+            renderLocationAndSourceInsights(activeLeads);
+            renderCampaignSummary(activeLeads);
+        }
+
+        function renderLocationAndSourceInsights(activeLeads) {
+            const locContainer = document.getElementById('location-insights-container');
+            const srcContainer = document.getElementById('source-insights-container');
+            if (!locContainer || !srcContainer) return;
+
+            // 1. Locations aggregation
+            const locs = {};
+            activeLeads.forEach(l => {
+                const rawLoc = (l.location || 'Unspecified').trim();
+                const key = rawLoc ? rawLoc.charAt(0).toUpperCase() + rawLoc.slice(1).toLowerCase() : 'Unspecified';
+                if (!locs[key]) locs[key] = { count: 0, won: 0, revenue: 0 };
+                locs[key].count++;
+                if (l.stage === 'Won') {
+                    locs[key].won++;
+                    locs[key].revenue += Number(l.price || 0);
+                }
+            });
+
+            const sortedLocs = Object.entries(locs).sort((a, b) => b[1].count - a[1].count).slice(0, 5);
+            if (sortedLocs.length === 0) {
+                locContainer.innerHTML = `<p class="text-xs text-gray-400 py-4 text-center">No location data available yet.</p>`;
+            } else {
+                const maxLoc = Math.max(...sortedLocs.map(x => x[1].count), 1);
+                locContainer.innerHTML = sortedLocs.map(([name, d]) => {
+                    const pct = Math.round((d.count / maxLoc) * 100);
+                    return `
+                        <div class="space-y-1">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-secondary">${name}</span>
+                                <span class="text-gray-500"><strong>${d.count}</strong> leads ${d.won > 0 ? `<span class="text-green-700 font-bold ml-1">• ${d.won} Won</span>` : ''}</span>
+                            </div>
+                            <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-secondary h-full rounded-full" style="width:${pct}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // 2. Inquiry Source aggregation
+            const srcs = {};
+            activeLeads.forEach(l => {
+                const key = l.category || 'Other';
+                if (!srcs[key]) srcs[key] = { count: 0, highIntent: 0, won: 0 };
+                srcs[key].count++;
+                if (Number(l.score) >= 4) srcs[key].highIntent++;
+                if (l.stage === 'Won') srcs[key].won++;
+            });
+
+            const sortedSrcs = Object.entries(srcs).sort((a, b) => b[1].count - a[1].count);
+            if (sortedSrcs.length === 0) {
+                srcContainer.innerHTML = `<p class="text-xs text-gray-400 py-4 text-center">No source data available yet.</p>`;
+            } else {
+                const maxSrc = Math.max(...sortedSrcs.map(x => x[1].count), 1);
+                srcContainer.innerHTML = sortedSrcs.map(([name, d]) => {
+                    const pct = Math.round((d.count / maxSrc) * 100);
+                    return `
+                        <div class="space-y-1">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-secondary">${name}</span>
+                                <span class="text-gray-500"><strong>${d.count}</strong> leads • <span class="text-primary font-semibold">${d.highIntent} High-Intent</span></span>
+                            </div>
+                            <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-primary h-full rounded-full" style="width:${pct}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function filterByQuickAction(type) {
+            switchTab('leads');
+            const stageSelect = document.getElementById('stageFilter');
+            if (type === 'New Inquiry') {
+                stageSelect.value = 'New Inquiry';
+            } else if (type === 'Due') {
+                stageSelect.value = 'DUE_FOLLOWUP';
+            } else {
+                stageSelect.value = 'All';
+            }
+            filterTable();
+        }
+
+        function filterByCampaignCard(campaignName, creativeName = '') {
+            switchTab('leads');
+            const campSelect = document.getElementById('campaignFilterDropdown');
+            if (campSelect) {
+                campSelect.value = campaignName;
+            }
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = creativeName || '';
+            }
+            filterTable();
+        }
+
+        function renderFunnel(activeLeads = getMonthFilteredLeads()) {
+            const stages = ['New Inquiry', 'Contacted', 'Qualified', 'High Intent', 'Won'];
+            const container = document.getElementById('funnel-container');
+            container.innerHTML = '';
+            
+            const maxCount = Math.max(...stages.map(s => activeLeads.filter(l => l.stage === s).length), 1);
+
+            stages.forEach((stage, index) => {
+                const count = activeLeads.filter(l => l.stage === stage).length;
+                const width = (count / maxCount) * 100;
+                const colors = ['bg-gray-200', 'bg-gray-300', 'bg-gray-400', 'bg-red-400', 'bg-red-600'];
+                
+                container.innerHTML += `
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <div class="w-20 sm:w-24 text-right text-xs sm:text-sm font-medium text-gray-600 truncate" title="${stage}">${stage}</div>
+                        <div class="flex-1 bg-gray-50 rounded-r-md h-6 sm:h-8 relative flex items-center">
+                            <div class="absolute left-0 top-0 h-full ${colors[index]} rounded-r-md transition-all duration-500" style="width: ${width}%"></div>
+                            <span class="relative z-10 ml-2 sm:ml-3 text-[10px] sm:text-xs font-bold text-gray-900">${count}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderCampaignSummary(activeLeads = getMonthFilteredLeads()) {
+            const campaigns = {};
+            const metaStore = getCampaignMetaStore();
+
+            // 1. Seed registered Meta Campaigns first (so even newly launched 0-lead active campaigns appear)
+            Object.entries(metaStore).forEach(([campName, meta]) => {
+                if (!campName) return;
+                campaigns[campName] = {
+                    inquiries: 0,
+                    scoredCount: 0,
+                    scoreSum: 0,
+                    qualified: 0,
+                    pipeline: 0,
+                    won: 0,
+                    value: 0,
+                    creativeStats: {},
+                    unassignedLeads: 0,
+                    services: {},
+                    locations: {},
+                    sources: {}
+                };
+            });
+
+            // 2. Aggregate live lead metrics into each campaign & per-creative counters
+            activeLeads.forEach(l => {
+                const campName = (l.campaign || 'Organic / Direct').trim();
+                if (!campaigns[campName]) {
+                    campaigns[campName] = {
+                        inquiries: 0,
+                        scoredCount: 0,
+                        scoreSum: 0,
+                        qualified: 0,
+                        pipeline: 0,
+                        won: 0,
+                        value: 0,
+                        creativeStats: {},
+                        unassignedLeads: 0,
+                        services: {},
+                        locations: {},
+                        sources: {}
+                    };
+                }
+                const c = campaigns[campName];
+                c.inquiries++;
+                if (Number(l.score) > 0) {
+                    c.scoredCount++;
+                    c.scoreSum += Number(l.score);
+                }
+                if (Number(l.score) >= 4) c.qualified++;
+                if (['Contacted', 'Qualified', 'High Intent'].includes(l.stage)) c.pipeline++;
+                if (l.stage === 'Won') {
+                    c.won++;
+                    c.value += Number(l.price || 0);
+                }
+
+                // Track individual creative performance inside this campaign
+                const crName = l.adCreative ? String(l.adCreative).trim() : '';
+                if (crName) {
+                    if (!c.creativeStats[crName]) {
+                        c.creativeStats[crName] = { count: 0, highIntent: 0, won: 0, value: 0 };
+                    }
+                    c.creativeStats[crName].count++;
+                    if (Number(l.score) >= 4) c.creativeStats[crName].highIntent++;
+                    if (l.stage === 'Won') {
+                        c.creativeStats[crName].won++;
+                        c.creativeStats[crName].value += Number(l.price || 0);
+                    }
+                } else {
+                    c.unassignedLeads++;
+                }
+
+                if (l.bookedService && String(l.bookedService).trim()) {
+                    const srv = String(l.bookedService).trim();
+                    c.services[srv] = (c.services[srv] || 0) + 1;
+                }
+                if (l.location && String(l.location).trim()) {
+                    const loc = String(l.location).trim();
+                    c.locations[loc] = (c.locations[loc] || 0) + 1;
+                }
+                if (l.category && String(l.category).trim()) {
+                    const src = String(l.category).trim();
+                    c.sources[src] = (c.sources[src] || 0) + 1;
+                }
+            });
+
+            const entries = Object.entries(campaigns).sort((a, b) => b[1].inquiries - a[1].inquiries);
+            const campCountBadge = document.getElementById('tab-campaigns-count');
+            if (campCountBadge) campCountBadge.innerText = entries.length;
+
+            const cardsGrid = document.getElementById('activeCampaignCardsGrid');
+            const tbody = document.getElementById('campaignTableBody');
+            if (cardsGrid) cardsGrid.innerHTML = '';
+            if (tbody) tbody.innerHTML = '';
+
+            if (entries.length === 0) {
+                if (cardsGrid) {
+                    cardsGrid.innerHTML = `
+                        <div class="col-span-2 bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500 text-sm">
+                            ${isAdminMode
+                                ? 'No active campaigns linked yet. Click <strong>"+ Add / Customize Campaign"</strong> above to set up your running Meta Ads & Reels!'
+                                : 'No active campaigns to display for the selected period.'}
+                        </div>`;
+                }
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">No campaign data for the selected month.</td></tr>`;
+                }
+                return;
+            }
+
+            const getTopKey = (obj, fallback) => {
+                const keys = Object.entries(obj).sort((a, b) => b[1] - a[1]);
+                return keys.length > 0 ? keys[0][0] : fallback;
+            };
+
+            for (const [name, data] of entries) {
+                const wRate = data.inquiries > 0 ? ((data.won / data.inquiries) * 100).toFixed(1) : '0.0';
+                const qRate = data.inquiries > 0 ? Math.round((data.qualified / data.inquiries) * 100) : 0;
+                const avgQuality = data.scoredCount > 0 ? (data.scoreSum / data.scoredCount).toFixed(1) : '0.0';
+                const topService = getTopKey(data.services, 'General Makeover');
+                const topLocation = getTopKey(data.locations, 'Koyilandy / Local');
+                const topSource = getTopKey(data.sources, 'WhatsApp');
+
+                const customMeta = metaStore[name] || {};
+                const status = customMeta.status || 'Active';
+                const audience = customMeta.audience || `${topLocation} • Meta Target Audience`;
+                const objective = customMeta.objective || `${topSource} Lead Campaign`;
+
+                // Build array of creative objects with individual thumbnails, links, and lead counts
+                const creativeObjects = extractCreativeObjects(customMeta, data.creativeStats);
+                const primaryThumb = creativeObjects.find(c => c.thumbUrl)?.thumbUrl || '';
+
+                const isPaused = status === 'Paused';
+                const statusBadge = isPaused
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⏸ Paused</span>`
+                    : `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-green-100 text-green-800 border border-green-200"><span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span>Active</span>`;
+
+                const safeName = name.replace(/'/g, "\\'");
+
+                // Build the Multi-Creative Thumbnail & Lead Count Grid HTML
+                let creativesGridHtml = '';
+                if (creativeObjects.length > 0) {
+                    const tilesHtml = creativeObjects.map(cr => {
+                        const safeCrName = cr.name.replace(/'/g, "\\'");
+                        const hasThumb = Boolean(cr.thumbUrl);
+                        const hasLink = Boolean(cr.adLink);
+
+                        return `
+                            <div class="group bg-white hover:bg-gray-50 rounded-lg border border-gray-200 p-2.5 flex items-center justify-between gap-2.5 transition-all shadow-sm">
+                                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                    <!-- Creative Thumbnail or Reel Icon -->
+                                    <div class="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0 flex items-center justify-center">
+                                        ${hasThumb ? `
+                                            <img src="${cr.thumbUrl}" alt="${cr.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div style="display:none;" class="w-full h-full items-center justify-center bg-accent text-primary">
+                                                <i class="fas fa-film text-sm"></i>
+                                            </div>
+                                        ` : `
+                                            <div class="w-full h-full flex items-center justify-center bg-accent/70 text-primary">
+                                                <i class="fas fa-film text-sm"></i>
+                                            </div>
+                                        `}
+                                        ${hasLink ? `
+                                            <a href="${cr.adLink}" target="_blank" rel="noopener noreferrer" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity" title="Watch Live Ad Creative">
+                                                <i class="fas fa-play text-xs"></i>
+                                            </a>
+                                        ` : ''}
+                                    </div>
+
+                                    <!-- Creative Name & Meta -->
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <p class="text-xs font-bold text-secondary truncate" title="${cr.name}">${cr.name}</p>
+                                        </div>
+                                        <div class="flex items-center flex-wrap gap-1.5 mt-1">
+                                            <!-- Individual Lead Count Badge -->
+                                            <button type="button" onclick="filterByCampaignCard('${safeName}', '${safeCrName}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${cr.count > 0 ? 'bg-secondary text-white hover:bg-primary' : 'bg-gray-100 text-gray-500'} transition-colors" title="Click to view leads from ${cr.name}">
+                                                <i class="fas fa-user-check text-[9px]"></i> ${cr.count} ${cr.count === 1 ? 'Lead' : 'Leads'}
+                                            </button>
+                                            ${cr.highIntent > 0 ? `
+                                                <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-accent text-primary border border-red-200" title="High-Intent 4-5★ Leads">
+                                                    ${cr.highIntent} ★
+                                                </span>
+                                            ` : ''}
+                                            ${cr.won > 0 ? `
+                                                <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-800 border border-green-200">
+                                                    ${cr.won} Won
+                                                </span>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Per-Creative Quick Actions (Client only sees Live Ad Preview link) -->
+                                <div class="flex items-center gap-1 flex-shrink-0 no-print">
+                                    ${hasLink ? `
+                                        <a href="${cr.adLink}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-md bg-accent/60 hover:bg-primary text-primary hover:text-white flex items-center gap-1 text-[10px] font-bold transition-colors" title="Watch Live Ad Post (${cr.name})">
+                                            <i class="fas fa-external-link-alt text-[9px]"></i> <span class="hidden sm:inline">View Ad</span>
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    creativesGridHtml = `
+                        <div class="px-4 py-3 bg-gray-50/80 border-b border-gray-100 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+                                    <i class="fas fa-layer-group text-primary"></i> Active Ad Creatives (${creativeObjects.length})
+                                </span>
+                                ${data.unassignedLeads > 0 ? `
+                                    <span class="text-[10px] text-gray-400 font-medium">${data.unassignedLeads} general campaign lead${data.unassignedLeads === 1 ? '' : 's'}</span>
+                                ` : ''}
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                ${tilesHtml}
+                            </div>
+                        </div>
+                    `;
+                } else if (isAdminMode) {
+                    creativesGridHtml = `
+                        <div class="px-4 py-2.5 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-400">
+                            <span><i class="fas fa-film mr-1"></i> No individual creatives linked yet</span>
+                            <button onclick="openCampaignMetaModal('${safeName}')" class="text-[11px] font-bold text-primary hover:underline no-print">+ Add Reels / Creatives</button>
+                        </div>
+                    `;
+                }
+
+                // Render Visual Active Campaign Card
+                if (cardsGrid) {
+                    cardsGrid.innerHTML += `
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+                            <div>
+                                <!-- Top Identity Header -->
+                                <div class="p-4 sm:p-5 border-b border-gray-100 flex items-start justify-between gap-3">
+                                    <div class="flex items-start gap-3.5 min-w-0">
+                                        ${primaryThumb ? `
+                                            <img src="${primaryThumb}" alt="${name}" class="w-12 h-12 rounded-xl object-cover border border-gray-200 flex-shrink-0" onerror="this.style.display='none'">
+                                        ` : `
+                                            <div class="w-11 h-11 rounded-xl bg-accent text-primary flex items-center justify-center flex-shrink-0 font-bold text-base border border-red-200">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </div>
+                                        `}
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <h3 class="text-base sm:text-lg font-bold text-secondary truncate" title="${name}">${name}</h3>
+                                                ${statusBadge}
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-2 flex-wrap">
+                                                <span><i class="fas fa-crosshairs text-primary mr-1"></i>${audience}</span>
+                                                <span class="text-gray-300">•</span>
+                                                <span>${objective}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    ${isAdminMode ? `
+                                        <div class="flex items-center gap-1 flex-shrink-0 no-print">
+                                            <button onclick="openCampaignMetaModal('${safeName}')" class="text-xs font-semibold text-gray-600 hover:text-secondary px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors flex items-center gap-1" title="Admin: Manage Creatives, Links & Thumbnails">
+                                                <i class="fas fa-sliders-h text-primary text-xs"></i> <span class="hidden sm:inline">Customize</span>
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+
+                                <!-- Auto-Calculated Live Metrics Grid -->
+                                <div class="grid grid-cols-3 divide-x divide-gray-100 bg-gray-50/40 border-b border-gray-100">
+                                    <div class="p-3 text-center">
+                                        <p class="text-[10px] font-semibold text-gray-500 uppercase">Total Leads</p>
+                                        <p class="text-lg sm:text-xl font-bold text-secondary mt-0.5">${data.inquiries}</p>
+                                        <p class="text-[10px] text-gray-500">${data.pipeline} in pipeline</p>
+                                    </div>
+                                    <div class="p-3 text-center">
+                                        <p class="text-[10px] font-semibold text-gray-500 uppercase">Lead Quality</p>
+                                        <p class="text-lg sm:text-xl font-bold text-secondary mt-0.5">⭐ ${avgQuality}</p>
+                                        <p class="text-[10px] font-semibold text-primary">${data.qualified} High-Intent (${qRate}%)</p>
+                                    </div>
+                                    <div class="p-3 text-center bg-accent/20">
+                                        <p class="text-[10px] font-semibold text-gray-500 uppercase">Won & Revenue</p>
+                                        <p class="text-lg sm:text-xl font-bold text-primary mt-0.5">₹${data.value.toLocaleString('en-IN')}</p>
+                                        <p class="text-[10px] font-bold text-green-700">${data.won} Won (${wRate}%)</p>
+                                    </div>
+                                </div>
+
+                                <!-- Multi-Creative Grid Section -->
+                                ${creativesGridHtml}
+                            </div>
+
+                            <!-- Card Footer: Top Service & View Leads -->
+                            <div class="px-4 py-2.5 bg-white flex items-center justify-between text-xs">
+                                <div class="text-gray-600 truncate pr-2">
+                                    <span class="font-semibold text-secondary">Most Asked:</span> ${topService}
+                                </div>
+                                <div class="flex items-center gap-3 flex-shrink-0 no-print">
+                                    <button onclick="filterByCampaignCard('${safeName}')" class="text-primary hover:underline font-bold flex items-center gap-1">
+                                        View Campaign Leads <i class="fas fa-arrow-right text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Render Table Row with per-creative lead badges
+                const rowClass = (Number(wRate) > 10) ? 'bg-accent/20' : '';
+                const creativeBadgesMatrix = creativeObjects.map(cr =>
+                    `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-700 border border-gray-200">${cr.name}: <strong class="text-primary">${cr.count}</strong></span>`
+                ).join(' ');
+
+                if (tbody) {
+                    tbody.innerHTML += `
+                        <tr class="${rowClass} hover:bg-gray-50">
+                            <td class="px-4 sm:px-6 py-3">
+                                <div class="text-xs sm:text-sm font-bold text-secondary">${name}</div>
+                                ${creativeBadgesMatrix ? `<div class="flex flex-wrap gap-1 mt-1">${creativeBadgesMatrix}</div>` : ''}
+                            </td>
+                            <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-center font-semibold text-secondary">${data.inquiries}</td>
+                            <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-center font-bold text-amber-600">⭐ ${avgQuality}</td>
+                            <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-center text-gray-600">${data.qualified} <span class="text-[10px] text-gray-400">(${qRate}%)</span></td>
+                            <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-center text-blue-700 font-medium">${data.pipeline}</td>
+                            <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-center font-bold text-primary">${data.won}</td>
+                            <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-center font-medium">${wRate}%</td>
+                            <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs sm:text-sm text-right font-bold text-secondary">₹${data.value.toLocaleString('en-IN')}</td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        function getStageBadge(stage) {
+            switch(stage) {
+                case 'New Inquiry': return 'badge-new';
+                case 'Contacted': return 'badge-contacted';
+                case 'Qualified': 
+                case 'High Intent': return 'badge-qualified';
+                case 'Won': return 'badge-won';
+                case 'Lost': return 'badge-lost';
+                default: return 'bg-gray-100 text-gray-600 border border-gray-200';
+            }
+        }
+
+        // Interactive 1-Click Inline Stars
+        function getInteractiveScoreStars(leadId, score) {
+            const currentScore = Number(score || 0);
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                const activeClass = i <= currentScore ? 'fas fa-star text-primary' : 'far fa-star text-gray-300 hover:text-red-400';
+                stars += `<button type="button" onclick="quickUpdateLead('${leadId}', 'score', ${i})" class="p-0.5 focus:outline-none transition-transform hover:scale-125" title="Set Quality Score to ${i}★"><i class="${activeClass} text-[11px]"></i></button>`;
+            }
+            return stars;
+        }
+
+        // Quick 1-Click Inline Update for Stage or Score
+        async function quickUpdateLead(leadId, field, value) {
+            const lead = leads.find(l => String(l.id) === String(leadId));
+            if (!lead) return;
+
+            lead[field] = value;
+            if (field === 'stage' && value === 'Won') {
+                lead.salesStatus = 'Won';
+            } else if (field === 'stage' && value === 'Lost') {
+                lead.salesStatus = 'Lost';
+            }
+
+            calculateMetrics();
+            filterTable();
+            showToast(`Updated ${lead.name}'s ${field === 'score' ? 'Quality Score to ' + value + '★' : 'Stage to ' + value}`);
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        id: lead.id,
+                        date: normalizeDateStr(lead.date),
+                        name: lead.name,
+                        phone: lead.phone || '-',
+                        location: lead.location || '',
+                        campaign: lead.campaign || 'Organic',
+                        adCreative: lead.adCreative || '',
+                        category: lead.category || 'WhatsApp',
+                        bookedService: lead.bookedService || '',
+                        score: parseInt(lead.score || 0),
+                        stage: lead.stage || 'New Inquiry',
+                        valClass: lead.valClass || 'Standard',
+                        price: parseFloat(lead.price || 0),
+                        salesStatus: lead.salesStatus || 'Open',
+                        lastContact: normalizeDateStr(lead.lastContact),
+                        nextFollowup: normalizeDateStr(lead.nextFollowup),
+                        nextAction: lead.nextAction || '',
+                        lostReason: lead.lostReason || ''
+                    })
+                });
+            } catch (err) {
+                console.error("Inline update failed:", err);
+                showToast("Failed to sync change with sheet", true);
+            }
+        }
+
+        // Smart WhatsApp Template Modal Launcher
+        function openWaModal(leadId) {
+            const lead = leads.find(l => String(l.id) === String(leadId));
+            if (!lead || !lead.phone) return;
+
+            let digits = String(lead.phone).replace(/\D/g, '');
+            if (digits.length === 10) digits = '91' + digits;
+            if (digits.length < 10) {
+                showToast("Invalid phone number for WhatsApp", true);
+                return;
+            }
+
+            const name = lead.name || 'there';
+            const service = lead.bookedService || 'our makeover & salon services';
+            document.getElementById('waModalClientName').innerText = `WhatsApp ${lead.name}`;
+            document.getElementById('waModalClientPhone').innerText = `+${digits} • ${service}`;
+
+            const templates = [
+                {
+                    title: "1. First Inquiry Greeting (മലയാളം / English)",
+                    desc: "Quick warm welcome & service confirmation",
+                    text: `Hi ${name}, thank you for contacting *Myos Makeover Studio* regarding *${service}*! ✨ How can we help you with your booking or package details today?`
+                },
+                {
+                    title: "2. Share Package & Offer Details",
+                    desc: "For leads asking about rates or campaign offers",
+                    text: `Hi ${name}, greetings from *Myos Makeover Studio*! Regarding your inquiry for *${service}*, we would love to share our latest packages and special campaign offers. When is your function/preferred date?`
+                },
+                {
+                    title: "3. Gentle Follow-up & Trial/Appointment",
+                    desc: "For Contacted / Qualified pipeline leads",
+                    text: `Hi ${name}, hope you are doing well! This is a quick follow-up from *Myos Makeover Studio* regarding your *${service}* inquiry. Would you like to book a consultation or lock your slot?`
+                }
+            ];
+
+            const listEl = document.getElementById('waTemplatesList');
+            listEl.innerHTML = templates.map(t => {
+                const url = `https://wa.me/${digits}?text=${encodeURIComponent(t.text)}`;
+                return `
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" onclick="markContactedToday('${lead.id}')" class="block p-3 rounded-lg border border-gray-200 hover:border-green-500 hover:bg-green-50/50 transition-all">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-secondary">${t.title}</span>
+                            <i class="fab fa-whatsapp text-green-600"></i>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-1 line-clamp-2">${t.text}</p>
+                    </a>
+                `;
+            }).join('');
+
+            document.getElementById('waTemplateModal').classList.remove('hidden');
+        }
+
+        function closeWaModal() {
+            document.getElementById('waTemplateModal').classList.add('hidden');
+        }
+
+        function markContactedToday(leadId) {
+            closeWaModal();
+            const lead = leads.find(l => String(l.id) === String(leadId));
+            if (!lead) return;
+            const today = new Date().toISOString().split('T')[0];
+            lead.lastContact = today;
+            if (lead.stage === 'New Inquiry') {
+                quickUpdateLead(leadId, 'stage', 'Contacted');
+            }
+        }
+
+        function renderLeadTable(data = getMonthFilteredLeads()) {
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = '';
+            
+            if(data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-sm text-gray-500">No leads found for this filter.</td></tr>`;
+                return;
+            }
+
+            const stageOptions = ['New Inquiry', 'Contacted', 'Qualified', 'High Intent', 'Won', 'Lost'];
+
+            data.forEach(l => {
+                const normDate = normalizeDateStr(l.date);
+                const dateObj = new Date(normDate);
+                const formattedDate = isNaN(dateObj) ? l.date : dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors border-b border-gray-100';
+                if(l.stage === 'Won') tr.classList.add('bg-green-50/20');
+
+                const valClass = (l.valClass === 'Premium' || l.valClass === 'VIP') ? 'bg-secondary text-white' : 'bg-gray-100 text-gray-600';
+                const cleanPhone = String(l.phone || '').replace(/[^\d+]/g, '');
+
+                // Follow-up status badge
+                const alertState = getFollowupAlertState(l);
+                let followupBadge = '<span class="text-[11px] text-gray-400">No date set</span>';
+                if (l.nextFollowup) {
+                    const fDateObj = new Date(normalizeDateStr(l.nextFollowup));
+                    const fFormatted = isNaN(fDateObj) ? l.nextFollowup : fDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                    if (alertState === 'overdue') {
+                        followupBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200"><i class="fas fa-exclamation-circle"></i> Overdue: ${fFormatted}</span>`;
+                    } else if (alertState === 'today') {
+                        followupBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200"><i class="fas fa-bell"></i> Today: ${fFormatted}</span>`;
+                    } else {
+                        followupBadge = `<span class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-600"><i class="far fa-calendar text-gray-400"></i> ${fFormatted}</span>`;
+                    }
+                }
+
+                const stageSelectHtml = `
+                    <select onchange="quickUpdateLead('${l.id}', 'stage', this.value)" class="badge ${getStageBadge(l.stage)} cursor-pointer focus:outline-none border-0 pr-2 py-1">
+                        ${stageOptions.map(st => `<option value="${st}" class="bg-white text-secondary font-medium" ${l.stage === st ? 'selected' : ''}>${st}</option>`).join('')}
+                    </select>
+                `;
+
+                tr.innerHTML = `
+                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-xs text-gray-500">${formattedDate}</td>
+                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+                        <div class="flex items-center justify-between gap-2">
+                            <div>
+                                <div class="text-xs sm:text-sm font-bold text-secondary truncate max-w-[130px] sm:max-w-[170px]" title="${l.name}">${l.name}</div>
+                                <div class="text-[11px] text-gray-500 flex items-center gap-1.5">
+                                    <span>${l.phone || '-'}</span>
+                                    ${l.location ? `<span class="text-gray-300">•</span><span class="text-[10px] text-gray-500 font-medium truncate max-w-[80px]" title="${l.location}"><i class="fas fa-map-pin text-primary mr-0.5"></i>${l.location}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                ${cleanPhone.length >= 10 ? `<button type="button" onclick="openWaModal('${l.id}')" class="w-7 h-7 rounded-full bg-green-50 hover:bg-green-100 text-green-600 flex items-center justify-center border border-green-200 transition-colors" title="Smart WhatsApp ${l.name}"><i class="fab fa-whatsapp text-sm"></i></button>` : ''}
+                                ${cleanPhone.length >= 10 ? `<a href="tel:${cleanPhone}" class="w-7 h-7 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center border border-blue-200 transition-colors" title="Call ${l.name}"><i class="fas fa-phone-alt text-xs"></i></a>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+                        <div class="inline-block px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-semibold bg-gray-100 text-secondary border border-gray-200 truncate max-w-[110px] sm:max-w-[150px]" title="${l.campaign}">
+                            ${l.campaign || 'Organic'}
+                        </div>
+                        ${l.adCreative ? `<div class="text-[10px] text-gray-500 truncate max-w-[130px] mt-0.5" title="${l.adCreative}"><i class="fas fa-film text-primary mr-1"></i>${l.adCreative}</div>` : ''}
+                    </td>
+                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-xs font-bold text-secondary bg-gray-50/50">${l.category || '-'}</td>
+                    <td class="px-3 sm:px-4 py-3 bg-gray-50/50">
+                        <div class="text-xs text-gray-700 font-medium truncate max-w-[120px] sm:max-w-[160px]" title="${l.bookedService}">${l.bookedService || '-'}</div>
+                        <span class="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold ${valClass}">${l.valClass || 'Standard'}</span>
+                    </td>
+                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-0.5">${getInteractiveScoreStars(l.id, l.score)}</div>
+                    </td>
+                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-center">
+                        ${stageSelectHtml}
+                        <div class="text-[10px] text-gray-500 mt-0.5 font-medium">${l.salesStatus || 'Open'}</div>
+                        ${l.lostReason ? `<div class="text-[9px] text-red-600 font-semibold truncate max-w-[120px] mx-auto" title="${l.lostReason}">${l.lostReason}</div>` : ''}
+                    </td>
+                    <td class="px-3 sm:px-4 py-3">
+                        <div>${followupBadge}</div>
+                        ${l.nextAction ? `<div class="text-[11px] text-gray-500 truncate max-w-[140px] sm:max-w-[180px] mt-0.5" title="${l.nextAction}">${l.nextAction}</div>` : ''}
+                    </td>
+                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-right text-xs sm:text-sm font-bold ${l.price > 0 ? 'text-primary' : 'text-gray-400'} bg-accent/10">
+                        ${l.price > 0 ? '₹'+Number(l.price).toLocaleString('en-IN') : '-'}
+                    </td>
+                    <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-center sticky right-0 bg-white sm:bg-transparent border-l border-gray-100 sm:border-none shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] sm:shadow-none">
+                        <button onclick="editLead('${l.id}')" class="text-secondary hover:text-primary transition-colors text-xs font-bold bg-gray-100 hover:bg-gray-200 px-2.5 py-1.5 rounded">
+                            <i class="fas fa-pen sm:mr-1"></i><span class="hidden sm:inline">Edit</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const stage = document.getElementById('stageFilter').value;
+            const source = document.getElementById('sourceFilter') ? document.getElementById('sourceFilter').value : 'All';
+            const campFilter = document.getElementById('campaignFilterDropdown') ? document.getElementById('campaignFilterDropdown').value : 'All';
+            const monthLeads = getMonthFilteredLeads();
+
+            const filtered = monthLeads.filter(l => {
+                const matchSearch = (l.name||'').toLowerCase().includes(term) ||
+                                    String(l.phone||'').toLowerCase().includes(term) ||
+                                    (l.bookedService||'').toLowerCase().includes(term) ||
+                                    (l.campaign||'').toLowerCase().includes(term) ||
+                                    (l.adCreative||'').toLowerCase().includes(term) ||
+                                    (l.location||'').toLowerCase().includes(term);
+
+                let matchStage = true;
+                if (stage === 'DUE_FOLLOWUP') {
+                    const st = getFollowupAlertState(l);
+                    matchStage = (st === 'overdue' || st === 'today');
+                } else if (stage !== 'All') {
+                    matchStage = l.stage === stage;
+                }
+
+                const matchSource = source === 'All' || l.category === source;
+                const matchCamp = campFilter === 'All' || (l.campaign || 'Organic / Direct') === campFilter;
+                return matchSearch && matchStage && matchSource && matchCamp;
+            });
+            renderLeadTable(filtered);
+        }
+
+        // Dynamic Multi-Creative Builder Row Functions
+        function addCreativeRow(name = '', adLink = '', thumbUrl = '') {
+            const container = document.getElementById('creativeBuilderList');
+            const row = document.createElement('div');
+            row.className = 'creative-row p-3 rounded-lg bg-gray-50 border border-gray-200 space-y-2 relative';
+            row.innerHTML = `
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">Creative / Reel Name <span class="text-primary">*</span></label>
+                        <input type="text" class="cr-name-input block w-full border border-gray-300 rounded py-1.5 px-2.5 text-xs font-semibold text-secondary focus:ring-primary focus:border-primary outline-none bg-white" placeholder="e.g. Reel 1 - Bridal Transformation" value="${name.replace(/"/g, '&quot;')}">
+                    </div>
+                    <button type="button" onclick="this.closest('.creative-row').remove()" class="text-gray-400 hover:text-red-600 p-1.5 mt-4 rounded hover:bg-red-50 transition-colors" title="Remove Creative">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-medium text-gray-500 mb-0.5"><i class="fab fa-instagram text-primary mr-1"></i>Live Ad Post Link (IG / FB URL)</label>
+                        <input type="url" class="cr-link-input block w-full border border-gray-300 rounded py-1.5 px-2.5 text-xs focus:ring-primary focus:border-primary outline-none bg-white" placeholder="https://www.instagram.com/reel/..." value="${adLink.replace(/"/g, '&quot;')}">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-gray-500 mb-0.5"><i class="far fa-image text-primary mr-1"></i>Thumbnail Image URL (Optional)</label>
+                        <input type="url" class="cr-thumb-input block w-full border border-gray-300 rounded py-1.5 px-2.5 text-xs focus:ring-primary focus:border-primary outline-none bg-white" placeholder="https://..." value="${thumbUrl.replace(/"/g, '&quot;')}">
+                    </div>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        // Link / Customize Active Campaign Card Modal Functions (Multi-Creative Cloud Synced)
+        function openCampaignMetaModal(campName = '') {
+            if (!isAdminMode) {
+                handleAdminButtonClick();
+                return;
+            }
+            const store = getCampaignMetaStore();
+            const meta = campName ? (store[campName] || {}) : {};
+            const nameInput = document.getElementById('metaCampaignName');
+            nameInput.value = campName || '';
+            document.getElementById('metaStatus').value = meta.status || 'Active';
+            document.getElementById('metaAudience').value = meta.audience || '';
+            document.getElementById('metaObjective').value = meta.objective || '';
+
+            // Gather any creatives already logged on leads for this campaign
+            const dynamicCreatives = {};
+            if (campName) {
+                leads.filter(l => (l.campaign || '').trim() === campName && l.adCreative).forEach(l => {
+                    const cr = String(l.adCreative).trim();
+                    if (cr) dynamicCreatives[cr] = { count: 1 };
+                });
+            }
+
+            const existingCreatives = extractCreativeObjects(meta, dynamicCreatives);
+            const builderList = document.getElementById('creativeBuilderList');
+            builderList.innerHTML = '';
+
+            if (existingCreatives.length > 0) {
+                existingCreatives.forEach(cr => addCreativeRow(cr.name, cr.adLink, cr.thumbUrl));
+            } else {
+                addCreativeRow('', '', '');
+            }
+
+            document.getElementById('campaignMetaModal').classList.remove('hidden');
+        }
+
+        function closeCampaignMetaModal() {
+            document.getElementById('campaignMetaModal').classList.add('hidden');
+        }
+
+        async function saveCampaignMeta() {
+            const name = document.getElementById('metaCampaignName').value.trim();
+            if (!name) {
+                showToast("Please enter the Campaign Name!", true);
+                return;
+            }
+
+            // Collect all creative rows from the dynamic builder
+            const rows = document.querySelectorAll('#creativeBuilderList .creative-row');
+            const creativeItems = [];
+            rows.forEach(r => {
+                const cName = r.querySelector('.cr-name-input')?.value.trim() || '';
+                const cLink = r.querySelector('.cr-link-input')?.value.trim() || '';
+                const cThumb = r.querySelector('.cr-thumb-input')?.value.trim() || '';
+                if (cName) {
+                    creativeItems.push({ name: cName, adLink: cLink, thumbUrl: cThumb });
+                }
+            });
+
+            // Format backward-compatible strings + pipe-separated links/thumbs for Google Sheet column persistence
+            const creativesCsv = creativeItems.map(c => c.name).join(', ');
+            const adLinksPipe = creativeItems.map(c => c.adLink || '').join('|');
+            const thumbUrlsPipe = creativeItems.map(c => c.thumbUrl || '').join('|');
+
+            const metaObj = {
+                status: document.getElementById('metaStatus').value,
+                creatives: creativesCsv,
+                audience: document.getElementById('metaAudience').value.trim(),
+                objective: document.getElementById('metaObjective').value.trim(),
+                adLink: adLinksPipe,
+                thumbUrl: thumbUrlsPipe,
+                creativeItems: creativeItems
+            };
+
+            const store = getCampaignMetaStore();
+            store[name] = metaObj;
+            setCampaignMetaStore(store);
+            updateDropdownOptions();
+            calculateMetrics();
+
+            // If Add Lead Modal is open, auto-select this newly created campaign
+            const formCampInput = document.getElementById('formCampaign');
+            if (formCampInput && !document.getElementById('leadModal').classList.contains('hidden')) {
+                formCampInput.value = name;
+                onFormCampaignInput();
+            }
+
+            const btn = document.getElementById('saveCampMetaBtn');
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            btn.disabled = true;
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'SAVE_CAMPAIGN_META',
+                        campaignName: name,
+                        meta: metaObj
+                    })
+                });
+                showToast(`Campaign "${name}" (${creativeItems.length} creative${creativeItems.length === 1 ? '' : 's'}) synced!`);
+            } catch (e) {
+                showToast("Saved locally (Cloud sync pending)", false);
+            } finally {
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+                closeCampaignMetaModal();
+            }
+        }
+
+        function openAddLeadForCampaign(campName, creativeName = '') {
+            openAddLeadModal();
+            const formCamp = document.getElementById('formCampaign');
+            if (formCamp) {
+                formCamp.value = campName;
+                onFormCampaignInput();
+            }
+            if (creativeName) {
+                const formCr = document.getElementById('formAdCreative');
+                if (formCr) formCr.value = creativeName;
+            }
+        }
+
+        function printExecutiveReport() {
+            document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            document.getElementById('printPeriodBadge').innerText = formatMonthLabel(document.getElementById('monthFilter').value);
+            window.print();
+        }
+
+        function openAddLeadModal() {
+            document.getElementById('leadForm').reset();
+            document.getElementById('editLeadId').value = '';
+            document.getElementById('formDate').valueAsDate = new Date();
+            
+            document.getElementById('formStage').value = 'New Inquiry';
+            document.getElementById('formSalesStatus').value = 'Open';
+            document.getElementById('formValueClass').value = 'Standard';
+            document.getElementById('formScore').value = '0';
+            document.getElementById('formLostReason').value = '';
+            const crPills = document.getElementById('quickCreativePills');
+            if (crPills) crPills.innerHTML = '';
+            
+            updateDropdownOptions();
+            document.getElementById('modalTitle').innerText = 'Add New Lead';
+            document.getElementById('leadModal').classList.remove('hidden');
+        }
+
+        function closeAddLeadModal() {
+            document.getElementById('leadModal').classList.add('hidden');
+        }
+
+        function editLead(id) {
+            const lead = leads.find(l => String(l.id) === String(id));
+            if(!lead) return;
+
+            document.getElementById('editLeadId').value = lead.id;
+            document.getElementById('formDate').value = normalizeDateStr(lead.date) || '';
+            document.getElementById('formName').value = lead.name || '';
+            document.getElementById('formPhone').value = lead.phone || '';
+            document.getElementById('formLocation').value = lead.location || '';
+            document.getElementById('formCampaign').value = lead.campaign || '';
+            onFormCampaignInput();
+            document.getElementById('formAdCreative').value = lead.adCreative || '';
+            document.getElementById('formCategory').value = lead.category || '';
+            document.getElementById('formBookedService').value = lead.bookedService || '';
+            
+            document.getElementById('formScore').value = lead.score || 0;
+            document.getElementById('formStage').value = lead.stage || 'New Inquiry';
+            document.getElementById('formValueClass').value = lead.valClass || 'Standard';
+            document.getElementById('formPrice').value = lead.price || '';
+            
+            document.getElementById('formSalesStatus').value = lead.salesStatus || 'Open';
+            document.getElementById('formLastContact').value = normalizeDateStr(lead.lastContact) || '';
+            document.getElementById('formNextFollowup').value = normalizeDateStr(lead.nextFollowup) || '';
+            document.getElementById('formNextAction').value = lead.nextAction || '';
+            document.getElementById('formLostReason').value = lead.lostReason || '';
+            
+            document.getElementById('modalTitle').innerText = 'Edit Lead Details';
+            document.getElementById('leadModal').classList.remove('hidden');
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-3 rounded-lg shadow-xl text-white text-sm font-bold z-[100] flex items-center gap-2 transition-all duration-300 ${isError ? 'bg-red-600' : 'bg-secondary'}`;
+            toast.innerHTML = isError ? `<i class="fas fa-exclamation-triangle"></i> ${msg}` : `<i class="fas fa-check-circle text-green-400"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, -20px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        async function saveLead() {
+            const name = document.getElementById('formName').value.trim();
+            const category = document.getElementById('formCategory').value;
+            
+            if(!name || !category) {
+                showToast("Name and Inquiry Source are required!", true);
+                return;
+            }
+
+            const payload = {
+                id: document.getElementById('editLeadId').value || Date.now().toString(),
+                date: document.getElementById('formDate').value,
+                name: name,
+                phone: document.getElementById('formPhone').value || '-',
+                location: document.getElementById('formLocation').value || '',
+                campaign: document.getElementById('formCampaign').value || 'Organic',
+                adCreative: document.getElementById('formAdCreative').value || '',
+                category: category,
+                bookedService: document.getElementById('formBookedService').value || '',
+                score: parseInt(document.getElementById('formScore').value),
+                stage: document.getElementById('formStage').value,
+                valClass: document.getElementById('formValueClass').value,
+                price: parseFloat(document.getElementById('formPrice').value) || 0,
+                salesStatus: document.getElementById('formSalesStatus').value,
+                lastContact: document.getElementById('formLastContact').value,
+                nextFollowup: document.getElementById('formNextFollowup').value,
+                nextAction: document.getElementById('formNextAction').value,
+                lostReason: document.getElementById('formLostReason').value || ''
+            };
+
+            const btn = document.getElementById('saveBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showToast("Lead saved successfully!");
+                    loadData(true);
+                    closeAddLeadModal();
+                } else {
+                    showToast("Backend error: " + result.message, true);
+                }
+            } catch (error) {
+                console.error("Save error:", error);
+                showToast("Failed to save. Check your connection.", true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Direct 1-Click CSV Export for the selected Month
+        window.exportData = function() {
+            const dataToExport = getMonthFilteredLeads();
+            if (dataToExport.length === 0) {
+                showToast("No leads available to export for this month.", true);
+                return;
+            }
+
+            const headers = ["Lead ID", "Inquiry Date", "Lead Name", "Phone", "Location", "Campaign", "Ad / Creative", "Source", "Service / Need", "Stage", "Quality Score", "Customer Value", "Sales Status", "Last Contact", "Next Follow-up", "Remarks / Next Action", "Lost Reason", "Total Price (INR)"];
+            const csvRows = [headers.join(",")];
+
+            dataToExport.forEach(l => {
+                const row = [
+                    l.id, normalizeDateStr(l.date), l.name, l.phone, l.location,
+                    l.campaign, l.adCreative || '', l.category, l.bookedService, l.stage, l.score,
+                    l.valClass, l.salesStatus, normalizeDateStr(l.lastContact),
+                    normalizeDateStr(l.nextFollowup), l.nextAction, l.lostReason || '', l.price || 0
+                ].map(val => `"${String(val ?? '').replace(/"/g, '""')}"`);
+                csvRows.push(row.join(","));
+            });
+
+            const selectedMonth = document.getElementById('monthFilter').value;
+            const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Myos_Makeover_Leads_${selectedMonth}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("CSV Report downloaded!");
+        };
+
+        window.openClearModal = function() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('clearModal').classList.remove('hidden');
+        };
+
+        window.closeClearModal = function() {
+            document.getElementById('clearModal').classList.add('hidden');
+        };
+
+        window.confirmAdminClear = async function() {
+            const password = document.getElementById('adminPasswordInput').value;
+            if (password !== "StorykartAdmin") {
+                showToast("Incorrect admin password.", true);
+                return;
+            }
+
+            const btn = document.getElementById('confirmClearBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "CLEAR_DATA" })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showToast("All test data cleared successfully!");
+                    leads = [];
+                    calculateMetrics();
+                    filterTable();
+                    closeClearModal();
+                } else {
+                    showToast("Error clearing data.", true);
+                }
+            } catch (error) {
+                console.error("Clear error:", error);
+                showToast("Failed to clear data.", true);
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        };
+
+        window.onload = function() {
+            applyAdminModeUI();
+            loadData(false);
+            // Auto-sync with Google Sheets every 30 seconds
+            setInterval(() => loadData(true), 30000);
+        };
+    </script>
+</body>
+</html>
